@@ -1,0 +1,281 @@
+package com.ambiverse.api.sample.client;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import com.ambiverse.api.AmbiverseApiClient;
+import com.ambiverse.api.ApiException;
+import com.ambiverse.api.model.AnalyzeInput;
+import com.ambiverse.api.model.AnalyzeOutput;
+import com.ambiverse.api.model.Categories;
+import com.ambiverse.api.model.Category;
+import com.ambiverse.api.model.Entities;
+import com.ambiverse.api.model.Entity;
+import com.ambiverse.api.model.Link;
+import com.ambiverse.api.model.Match;
+import com.ambiverse.api.model.Meta;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+
+
+/**
+ * This is a basic sample for the
+ * <a href="https://www.ambiverse.com/natural-language-understanding-api/">Ambiverse Natural Language Understanding API</a>.
+ * The API extracts entities from unstructured text, enabling a more precise transformation of texts
+ * into actionable, measurable, and easily accessible knowledge. 
+ * 
+ * We will guide you through the two services currently exposed by the API:
+ * 
+ * 1. The Entity Linking service which identifies and links names of persons, locations,
+ * organizations, or products, to the Wikipedia-derived YAGO knowledge graph.
+ * 
+ * 2. The Knowledge Graph service which allows you to obtain further information about these
+ * entities, such as Wikipedia links, textual descriptions, images, and lists of relevant
+ * categories.
+ * 
+ * A complete walk-through can be found in the <a href="https://developer.ambiverse.com/overview">
+ * Natural Language Understanding API Overview</a>.
+ *  
+ * Once you added your OAuth 2 client credentials to the client_secrets.json file, you can just run
+ * this class and inspect the output of the API. We access the Ambiverse Natural Language 
+ * Understanding API using our SDK which builds on the
+ * <a href="https://developers.google.com/api-client-library/java/">Google API Client Library for Java</a>.
+ */
+public class HelloApiSample {
+	private static final String LF = System.lineSeparator();
+
+	/** Global instance of the JSON factory. */
+	private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
+	
+	/** Global instance of the HTTP transport. */
+	private static HttpTransport httpTransport = new NetHttpTransport();
+	
+	private static final Logger logger = Logger.getLogger(HelloApiSample.class.getName());
+	
+	private AmbiverseApiClient client = null;
+	
+
+	/** Main method for running some sample request against the Ambiverse API endpoint. */
+	public static void main(String[] args) throws IOException {
+		HelloApiSample helloApi = new HelloApiSample();
+		
+		// Initialize the API Client
+		helloApi.initialize();
+		
+		// Run some sample requests against the Entity Linking Service.
+		helloApi.runEntityLinkingSamples();		
+		
+		// Run some sample request against the Knowledge Graph Service.
+		helloApi.runKnowledgeGraphSamples();
+		
+		// Show how to handle errors
+		helloApi.runErrorHandlingSamples();
+	}
+	
+	/**
+	 * Runs some sample requests against the {@link AmbiverseApiClient#entityLinking() Entity 
+	 * Linking Service}.
+	 * 
+	 * @throws IOException
+	 */
+	private void runEntityLinkingSamples() throws IOException {
+		System.out.println("*** Running Entity Linking Service samples ***" + LF);
+		
+		// Entity Linking Service - Analyze a document
+		String text = "When [[Who]] played Tommy in Columbus, Pete was at his best.";
+		
+		AnalyzeInput input = new AnalyzeInput()
+				.withLanguage("en")		// Optional. If not set, language detection happens automatically.
+				.withText(text);
+		System.out.println("Sent text to /entitylinking/analyze for analysis: \"" + text + "\"");
+		
+		AnalyzeOutput output = client.entityLinking().analyze().process(input).execute();
+		
+		System.out.println("Recognized entities:");
+		
+		for (Match match : output.getMatches()) {
+			System.out.println("- Text match: " + match.getText() +
+							   " (" + match.getCharOffset() +
+							   ", " +
+							   (match.getCharOffset() + match.getCharLength()) +
+							   ") ");
+			System.out.println("  Linked entity: " + match.getEntity().getId() +
+							   " (confidence score: " + match.getEntity().getScore() + ")");
+		}
+		
+		System.out.println(LF);
+		
+		
+		// Entity Linking Service - Request metadata from the Entity Linking endpoint
+		System.out.println("Querying metadata at the /entitylinking/analyze/_meta endpoint.");
+		
+		Meta m = client.entityLinking().analyze().getMeta().execute();
+		System.out.println("- dump version: " + m.getDumpVersion());
+		System.out.println("- supported languages: " + m.getLanguages());
+		System.out.println("- database creation date: " + m.getCreationDate());
+		
+		System.out.println(LF);
+	}
+	
+	/**
+	 * Runs some sample requests against the {@link AmbiverseApiClient#knowledgeGraph() Knowledge
+	 * Graph Service}.
+	 * 
+	 * @throws IOException
+	 */
+	private void runKnowledgeGraphSamples() throws IOException {
+		System.out.println("*** Running Knowledge Graph Service samples ***" + LF);
+		
+		// Knowledge Graph Service - Request a single entity
+		String id = "YAGO3:<Columbus,_Ohio>";
+		
+		System.out.println("Querying the Knowledge Graph at /knowledgegraph/entities for the entity \"" + id + "\".");
+		
+		Entities entities = client.knowledgeGraph().entities()
+				.get(id)
+				.execute();
+		
+		for (Entity e : entities.getEntities()) {		
+			System.out.println("- Name: " + e.getName());
+			System.out.println("- Description (first 100 chars): " + e.getDescription().substring(0,  100) + "...");
+			System.out.println("- Categories (subset of 10): " + new ArrayList<String>(e.getCategories()).subList(0, 10));
+			System.out.println("- Links: ");
+			for (Link l : e.getLinks()) {
+				System.out.println("  - Link: " + l.getUrl() + " (" + l.getSource() + ")");
+			}
+			System.out.println("- ImageUrl: " + e.getImageUrl());
+		}
+		
+		System.out.println(LF);
+		
+		
+		// Knowledge Graph Service - Request multiple entities
+		System.out.println("Querying the knowledge graph at /knowledgegraph/entities for multiple entities.");		
+		
+		entities = client.knowledgeGraph().entities()
+				.get("YAGO3:<The_Who>", "YAGO3:<Tommy_(album)>", "YAGO3:<Pete_Townshend>")
+				.execute();
+		
+		for (Entity e : entities.getEntities()) {
+			System.out.println("- Entity: " + e.getName() + " (" + e.getId() + ")");
+		}
+		
+		System.out.println(LF);
+		
+		
+		// Knowledge Graph Service - Request metadata from the Entities endpoint
+		System.out.println("Querying metadata at the /knowledgegraph/entities/_meta endpoint.");
+		
+		Meta m = client.knowledgeGraph().entities().getMeta().execute();
+		System.out.println("- dump version: " + m.getDumpVersion());
+		System.out.println("- supported languages: " + m.getLanguages());
+		System.out.println("- database creation date: " + m.getCreationDate());
+		System.out.println("- collection size: " + m.getCollectionSize());
+		
+		System.out.println(LF);
+		
+				
+		// Knowledge Graph Service - Request multiple categories
+		System.out.println("Querying the knowledge graph at /knowledgegraph/categories for multiple categories.");
+		
+		Categories categories = client.knowledgeGraph().categories()
+				.get("YAGO3:<wikicat_Polydor_Records_artists>", "YAGO3:<wikicat_British_Invasion_artists>")
+				.execute();
+		
+		for (Category c : categories.getCategories()) {
+			System.out.println("- Category: " + c.getName() + " (" + c.getId() + ")");
+		}
+		
+		System.out.println(LF);
+		
+		// Knowledge Graph Service - Request metadata from the Categories endpoint
+		System.out.println("Querying metadata at the /knowledgegraph/categories/_meta endpoint.");
+		
+		m = client.knowledgeGraph().categories().getMeta().execute();
+		
+		System.out.println("- dump version: " + m.getDumpVersion());
+		System.out.println("- supported languages: " + m.getLanguages());
+		System.out.println("- database creation date: " + m.getCreationDate());
+		System.out.println("- collection size: " + m.getCollectionSize());
+		
+		System.out.println(LF);
+	}
+	
+	/**
+	 * Runs some sample requests against both the {@link AmbiverseApiClient#entityLinking() Entity 
+	 * Linking Service} and the {@link AmbiverseApiClient#knowledgeGraph() Knowledge
+	 * Graph Service}.
+	 * 
+	 * @throws IOException
+	 */
+	private void runErrorHandlingSamples() throws IOException {
+		System.out.println("*** Running error handling samples ***" + LF);
+		
+		/* Send a text for which no language is specified. The API endpoint will return an error
+		 * message saying that you need to manually set a language for this text segment, as for
+		 * this very short text fragment no language can be detected automatically.
+		 */
+		String text = "ambiverse";
+		
+		System.out.println("Sent text to /entitylinking/analyze for analysis: \"" + text + "\"");
+		
+		AnalyzeInput input = new AnalyzeInput().withText(text);
+		
+		try {
+			client.entityLinking().analyze().process(input).execute();
+		} catch (ApiException e) {
+			System.out.println("Error message: " + e.getMessage());
+			System.out.println("Solution: Use setLanguage(String) or withLanguage(String) on the " +
+							   "AnalyzeInput object to manually specify the document language.");
+		}
+		
+		System.out.println(LF);
+		
+		
+		// Another example
+		System.out.println("Querying the knowledge graph at /knowledgegraph/entities for multiple entities.");
+		
+		String[] entityIDs = new String[] {
+				"YAGO3:<The_Who>",				// This entity will be found in the knowledge graph.
+				"YAGO3:<My_Fancy_Entity>"		// This entity will not be found.
+		};
+		
+		Entities entities = client.knowledgeGraph().entities()
+			.get(entityIDs)
+			.execute();
+		
+		for (int i = 0; i < entities.getEntities().size(); i++) {
+			Entity e = entities.getEntities().get(i);
+			
+			if (e.getId() != null) {
+				System.out.println("- " + e.getId() + " found. The image URL is " + e.getImageUrl());
+			} else {
+				System.out.println("- " + entityIDs[i] + " not found in the knowledge graph.");
+			}
+		}		
+	}
+	
+	/**
+	 * Creates and initializes a new instance of {@link AmbiverseApiClient}.
+	 * 
+	 * @return Initialized instance of {@link AmbiverseApiClient}
+	 * @throws IOException
+	 */
+	private void initialize() throws IOException {
+		/* Authenticates your client application against the Ambiverse API endpoint via the OAuth 2
+		 * protocol. Your client credentials are read from client_secrets.json on your classpath and
+		 * exchanged for an API access token, which is stored within the API client throughout your
+		 * session.
+		 */
+		Credential credential = AmbiverseApiClient.authorize(httpTransport, JSON_FACTORY);
+		
+		logger.info("Successfully obtained OAuth 2 access token." + LF);
+		
+		// Instantiate a new API client
+		this.client = new AmbiverseApiClient(httpTransport, JSON_FACTORY, credential);
+	}
+}
