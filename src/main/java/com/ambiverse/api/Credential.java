@@ -41,7 +41,11 @@ public class Credential extends com.google.api.client.auth.oauth2.Credential {
 		// Initially, pass the initialization on to super.
 		super.initialize(request);
 		
-		// Add an additional interceptor
+		// Set the timeouts.
+		request.setConnectTimeout(3 * 60000);  // 3 minutes connect timeout
+		request.setReadTimeout(3 * 60000);  // 3 minutes read timeout
+		
+		// Add an additional interceptor.
 		request.setResponseInterceptor(new HttpResponseInterceptor() {
 			@Override
 			public void interceptResponse(HttpResponse response) throws IOException {
