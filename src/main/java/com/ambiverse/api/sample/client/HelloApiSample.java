@@ -104,7 +104,7 @@ public class HelloApiSample {
 							   (match.getCharOffset() + match.getCharLength()) +
 							   ") ");
 			System.out.println("  Linked entity: " + match.getEntity().getId() +
-							   " (confidence score: " + match.getEntity().getScore() + ")");
+							   " (confidence score: " + match.getEntity().getConfidence() + ")");
 		}
 		
 		System.out.println(LF);

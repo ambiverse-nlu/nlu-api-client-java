@@ -25,8 +25,8 @@ public class EntityReference {
     private String url;
 
 	@Key
-    @JsonProperty("score")
-    private double score;
+    @JsonProperty("confidence")
+    private double confidence;
 
 
     public String getId() {
@@ -45,12 +45,12 @@ public class EntityReference {
 		this.url = url;
 	}
 
-	public double getScore() {
-		return score;
+	public double getConfidence() {
+		return confidence;
 	}
 
-	public void setScore(double score) {
-		this.score = score;
+	public void setConfidence(double score) {
+		this.confidence = score;
 	}
 
 	 @Override
