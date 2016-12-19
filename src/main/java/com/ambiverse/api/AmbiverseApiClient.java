@@ -35,7 +35,7 @@ public class AmbiverseApiClient extends AbstractGoogleJsonClient {
 	public static final String HOST_URL = "https://api.ambiverse.com";
 
 	/** The service path of the current schema */
-	public static final String SERVICE_PATH = "/v1beta3";
+	public static final String SERVICE_PATH = "/v1";
 
 	/** The file that the client credentials are read from */
 	private static final String CLIENT_SECRETS_FILENAME = "/client_secrets.json";

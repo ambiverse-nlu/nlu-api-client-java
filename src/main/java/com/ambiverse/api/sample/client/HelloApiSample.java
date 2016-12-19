@@ -1,6 +1,7 @@
 package com.ambiverse.api.sample.client;
 
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -56,6 +57,8 @@ public class HelloApiSample {
 	
 	private static final Logger logger = Logger.getLogger(HelloApiSample.class.getName());
 	
+	private static final NumberFormat numberFormat = NumberFormat.getIntegerInstance();
+	
 	private AmbiverseApiClient client = null;
 	
 
@@ -86,7 +89,7 @@ public class HelloApiSample {
 		System.out.println("*** Running Entity Linking Service samples ***" + LF);
 		
 		// Entity Linking Service - Analyze a document
-		String text = "When [[Who]] played Tommy in Columbus, Pete was at his best.";
+		String text = "Ma founded Alibaba in Hangzhou with investments from SoftBank and Goldman.";
 		
 		AnalyzeInput input = new AnalyzeInput()
 				.withLanguage("en")		// Optional. If not set, language detection happens automatically.
@@ -131,7 +134,7 @@ public class HelloApiSample {
 		System.out.println("*** Running Knowledge Graph Service samples ***" + LF);
 		
 		// Knowledge Graph Service - Request a single entity
-		String id = "YAGO3:<Columbus,_Ohio>";
+		String id = "http://www.wikidata.org/entity/Q193326";	// This entity is "Goldman Sachs".
 		
 		System.out.println("Querying the Knowledge Graph at /knowledgegraph/entities for the entity \"" + id + "\".");
 		
@@ -157,7 +160,9 @@ public class HelloApiSample {
 		System.out.println("Querying the knowledge graph at /knowledgegraph/entities for multiple entities.");		
 		
 		entities = client.knowledgeGraph().entities()
-				.get("YAGO3:<The_Who>", "YAGO3:<Tommy_(album)>", "YAGO3:<Pete_Townshend>")
+				.get("http://www.wikidata.org/entity/Q1137062",			// Jack Ma
+					 "http://www.wikidata.org/entity/Q1359568",			// Alibaba Group
+					 "http://www.wikidata.org/entity/Q4970")			// Hangzhou
 				.execute();
 		
 		for (Entity e : entities.getEntities()) {
@@ -174,7 +179,7 @@ public class HelloApiSample {
 		System.out.println("- dump version: " + m.getDumpVersion());
 		System.out.println("- supported languages: " + m.getLanguages());
 		System.out.println("- database creation date: " + m.getCreationDate());
-		System.out.println("- collection size: " + m.getCollectionSize());
+		System.out.println("- collection size: " + numberFormat.format(m.getCollectionSize()));
 		
 		System.out.println(LF);
 		
@@ -183,7 +188,8 @@ public class HelloApiSample {
 		System.out.println("Querying the knowledge graph at /knowledgegraph/categories for multiple categories.");
 		
 		Categories categories = client.knowledgeGraph().categories()
-				.get("YAGO3:<wikicat_Polydor_Records_artists>", "YAGO3:<wikicat_British_Invasion_artists>")
+				.get("YAGO3:<wikicat_Banks_of_the_United_States>",
+					 "YAGO3:<wikicat_Investment_banks>")
 				.execute();
 		
 		for (Category c : categories.getCategories()) {
@@ -200,7 +206,7 @@ public class HelloApiSample {
 		System.out.println("- dump version: " + m.getDumpVersion());
 		System.out.println("- supported languages: " + m.getLanguages());
 		System.out.println("- database creation date: " + m.getCreationDate());
-		System.out.println("- collection size: " + m.getCollectionSize());
+		System.out.println("- collection size: " + numberFormat.format(m.getCollectionSize()));
 		
 		System.out.println(LF);
 	}
@@ -236,12 +242,14 @@ public class HelloApiSample {
 		System.out.println(LF);
 		
 		
-		// Another example
+		/* Send multiple entity IDs to the Knowledge Graph service. If an entity cannot be found,
+		 * its ID will be set to null.
+		 */
 		System.out.println("Querying the knowledge graph at /knowledgegraph/entities for multiple entities.");
 		
 		String[] entityIDs = new String[] {
-				"YAGO3:<The_Who>",				// This entity will be found in the knowledge graph.
-				"YAGO3:<My_Fancy_Entity>"		// This entity will not be found.
+				"http://www.wikidata.org/entity/Q93346",		// This entity will be found in the knowledge graph.
+				"http://www.wikidata.org/entity/Q0"				// This entity will not be found.
 		};
 		
 		Entities entities = client.knowledgeGraph().entities()
@@ -256,7 +264,7 @@ public class HelloApiSample {
 			} else {
 				System.out.println("- " + entityIDs[i] + " not found in the knowledge graph.");
 			}
-		}		
+		}			
 	}
 	
 	/**

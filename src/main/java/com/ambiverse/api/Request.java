@@ -30,7 +30,7 @@ public class Request<T> extends AbstractGoogleClientRequest<T> {
 			HttpContent httpContent, Class<T> responseClass) {
 		super(abstractGoogleClient, requestMethod, uriTemplate, httpContent, responseClass);
 		
-		this.setDisableGZipContent(true);		
+//		this.setDisableGZipContent(true);		
 	}
 	
 	/**

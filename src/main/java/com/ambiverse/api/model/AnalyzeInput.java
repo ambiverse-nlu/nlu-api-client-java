@@ -1,5 +1,7 @@
 package com.ambiverse.api.model;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -11,7 +13,8 @@ import com.google.api.client.util.Key;
     "language",
     "text",
     "confidenceThreshold",
-    "coherentDocument"
+    "coherentDocument",
+    "annotatedMentions"
 })
 public class AnalyzeInput {
 
@@ -55,6 +58,14 @@ public class AnalyzeInput {
     @Key
     @JsonProperty("coherentDocument")
     private Boolean coherentDocument;
+    
+    /**
+     * Mentions provided by the user
+     *
+     */
+    @Key
+    @JsonProperty("annotatedMentions")
+    private List<AnnotatedMention> annotatedMentions;
 
     /**
      * Will be part of the response so that you can identify your documents.
@@ -190,6 +201,33 @@ public class AnalyzeInput {
 
     public AnalyzeInput withCoherentDocument(Boolean coherentDocument) {
         this.coherentDocument = coherentDocument;
+        return this;
+    }
+    
+    /**
+     * Get the fragments of the input document which have been manually marked as entity names (i.e. so-called <i>mentions</i>).
+     *
+     * @return
+     *     List of annotated mentions
+     */
+    @JsonProperty("annotatedMentions")
+    public List<AnnotatedMention> getAnnotatedMentions() {
+        return annotatedMentions;
+    }
+
+    /**
+     * Manually mark specific fragments of the input document as entity names (i.e. so-called <i>mentions</i>), which will then be attempted to be linked to the knowledge graph.
+     *
+     * @param annotatedMentions
+     *     List of annotated mentions
+     */
+    @JsonProperty("annotatedMentions")
+    public void setAnnotatedMentions(List<AnnotatedMention> annotatedMentions) {
+        this.annotatedMentions = annotatedMentions;
+    }
+
+    public AnalyzeInput withAnnotatedMentions(List<AnnotatedMention> annotatedMentions) {
+        this.annotatedMentions = annotatedMentions;
         return this;
     }
 }
