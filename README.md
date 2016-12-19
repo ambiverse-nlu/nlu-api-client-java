@@ -25,18 +25,18 @@ The client library includes these features:
   // Prepare the analysis input, an English text fragment in this case.
   AnalyzeInput input = new AnalyzeInput()
 	.withLanguage("en")		// Optional. If not set, language detection happens automatically.
-	.withText("When [[Who]] played Tommy in Columbus, Pete was at his best.");
+	.withText("Ma founded Alibaba in Hangzhou with investments from SoftBank and Goldman.");
 
   // Send the input to the /entitylinking/analyze endpoint for analysis.
   AnalyzeOutput output = client.entityLinking().analyze().process(input).execute();
 	
   // Iterate through the identified matches which are linked to entities in the knowledge graph.
   for (Match match : output.getMatches()) {
-    String text = match.getText();                       // Span of text in the input that was linked.
-    Integer charOffset = match.getCharOffset();          // Character offset of the match in the original text.
-    Integer charLength = match.getCharLength();          // Character length of the match.
-    String entityID = match.getEntity().getId();         // ID of the linked entity, e.g. "YAGO3:<The_Who>".
-    double confidence = match.getEntity().getScore();    // Confidence score.
+    String text = match.getText();                         // Span of text in the input that was linked.
+    Integer charOffset = match.getCharOffset();            // Character offset of the match in the original text.
+    Integer charLength = match.getCharLength();            // Character length of the match.
+    String entityID = match.getEntity().getId();           // ID of the linked entity.
+    double confidence = match.getEntity().getConfidence(); // Confidence score.
     ...
   }
   ```
@@ -46,7 +46,9 @@ The client library includes these features:
   ```java
   // Query the knowledge graph for details about some entities.
   Entities entities = client.knowledgeGraph().entities()
-    .get("YAGO3:<The_Who>", "YAGO3:<Tommy_(album)>", "YAGO3:<Pete_Townshend>")
+    .get("http://www.wikidata.org/entity/Q1137062",   // Jack Ma
+         "http://www.wikidata.org/entity/Q1359568",   // Alibaba Group
+         "http://www.wikidata.org/entity/Q4970")      // Hangzhou
     .execute();
 
   // Iterate through the entities.
