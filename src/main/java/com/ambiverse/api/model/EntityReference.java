@@ -26,7 +26,7 @@ public class EntityReference {
 
 	@Key
     @JsonProperty("confidence")
-    private double confidence;
+    private Double confidence;
 
 
     public String getId() {
@@ -45,11 +45,11 @@ public class EntityReference {
 		this.url = url;
 	}
 
-	public double getConfidence() {
+	public Double getConfidence() {
 		return confidence;
 	}
 
-	public void setConfidence(double score) {
+	public void setConfidence(Double score) {
 		this.confidence = score;
 	}
 
