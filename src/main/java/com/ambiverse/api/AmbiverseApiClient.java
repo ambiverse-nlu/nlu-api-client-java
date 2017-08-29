@@ -38,7 +38,7 @@ public class AmbiverseApiClient extends AbstractGoogleJsonClient {
 	public static final String SERVICE_PATH = "/v1";
 
 	/** The file that the client credentials are read from */
-	private static final String CLIENT_SECRETS_FILENAME = "/client_secrets.json";
+	private static final String CLIENT_SECRETS_FILENAME = "client_secrets.json";
 	
 	private static final Logger logger = Logger.getLogger(AmbiverseApiClient.class.getName());
 
@@ -83,7 +83,7 @@ public class AmbiverseApiClient extends AbstractGoogleJsonClient {
 		GoogleClientSecrets clientSecrets = null;
 		try {
 			clientSecrets = GoogleClientSecrets.load(jsonFactory,
-				new InputStreamReader(AmbiverseApiClient.class.getResourceAsStream(CLIENT_SECRETS_FILENAME)));
+				new InputStreamReader(AmbiverseApiClient.class.getClassLoader().getResourceAsStream(CLIENT_SECRETS_FILENAME)));
 		} catch (NullPointerException e) {
 			logger.severe("Copy src/main/resources/client_secrets_template.json to src/main/resources" + CLIENT_SECRETS_FILENAME + " , " +
 										System.lineSeparator() +
