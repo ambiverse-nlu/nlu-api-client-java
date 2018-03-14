@@ -1,217 +1,269 @@
 package com.ambiverse.api.model;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.api.client.util.Key;
+import com.google.api.client.util.Value;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "id",
-    "name",
-    "links",
-    "description",
-    "imageUrl",
-    "categories"
-})
+
 public class Entity {
 
-	@Key
-    @JsonProperty("id")
-    private String id;
+  @Key
+  @JsonProperty("id")
+  private String id;
 
-	@Key
-    @JsonProperty("name")
-    private String name;
+  /**
+   * The most salient entity type.
+   */
+  public enum TypeEnum {
+    @Value("UNKNOWN")
+    UNKNOWN("UNKNOWN"),
 
-	@Key
-    @JsonProperty("links")
-    private List<Link> links = new ArrayList<Link>();
-	
-	@Key
-    @JsonProperty("description")
-    private String description;
-	
-	@Key
-    @JsonProperty("imageUrl")
-    private String imageUrl;
-	
-	@Key
-    @JsonProperty("categories")
-    @JsonDeserialize(as = java.util.LinkedHashSet.class)
-    private Set<String> categories = new LinkedHashSet<String>();
-    
-    /**
-     * 
-     * (Required)
-     * 
-     * @return
-     *     The id
-     */
-    @JsonProperty("id")
-    public String getId() {
-        return id;
+    @Value("PERSON")
+    PERSON("PERSON"),
+
+    @Value("LOCATION")
+    LOCATION("LOCATION"),
+
+    @Value("ORGANIZATION")
+    ORGANIZATION("ORGANIZATION"),
+
+    @Value("EVENT")
+    EVENT("EVENT"),
+
+    @Value("ARTIFACT")
+    ARTIFACT("ARTIFACT"),
+
+    @Value("OTHER")
+    OTHER("OTHER");
+
+    private String value;
+
+    TypeEnum(String value) {
+      this.value = value;
     }
 
-    /**
-     * 
-     * (Required)
-     * 
-     * @param id
-     *     The id
-     */
-    @JsonProperty("id")
-    public void setId(String id) {
-        this.id = id;
-    }
-    
-    public Entity withId(String id) {
-        this.id = id;
-        return this;
+    @Override @JsonValue public String toString() {
+      return String.valueOf(value);
     }
 
-    /**
-     * 
-     * (Required)
-     * 
-     * @return
-     *     The name
-     */
-    @JsonProperty("name")
-    public String getName() {
-        return name;
+    @JsonCreator public static TypeEnum fromValue(String text) {
+      for (TypeEnum b : TypeEnum.values()) {
+        if (String.valueOf(b.value).equals(text)) {
+          return b;
+        }
+      }
+      return null;
     }
+  }
 
-    /**
-     * 
-     * (Required)
-     * 
-     * @param name
-     *     The name
-     */
-    @JsonProperty("name")
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    public Entity withName(String name) {
-        this.name = name;
-        return this;
-    }
+  @Key
+  @JsonProperty("type")
+  private TypeEnum type;
 
-    /**
-     * 
-     * (Required)
-     * 
-     * @return
-     *     The links
-     */
-    @JsonProperty("links")
-    public List<Link> getLinks() {
-        return links;
-    }
+  @Key
+  @JsonProperty("names")
+  private Map<String, Label> names = new HashMap<>();
 
-    /**
-     * 
-     * (Required)
-     * 
-     * @param links
-     *     The links
-     */
-    @JsonProperty("links")
-    public void setLinks(List<Link> links) {
-        this.links = links;
-    }
+  @Key
+  @JsonProperty("descriptions")
+  private Map<String, Label> descriptions = new HashMap<>();
 
-    public Entity withLinks(List<Link> links) {
-        this.links = links;
-        return this;
-    }
+  @Key
+  @JsonProperty("detailedDescriptions")
+  private Map<String, Label> detailedDescriptions;
 
-    /**
-     * 
-     * @return
-     *     The description
-     */
-    @JsonProperty("description")
-    public String getDescription() {
-        return description;
-    }
+  @Key
+  @JsonProperty("image")
+  private Image image = null;
 
-    /**
-     * 
-     * @param description
-     *     The description
-     */
-    @JsonProperty("description")
-    public void setDescription(String description) {
-        this.description = description;
-    }
+  @Key
+  @JsonProperty("links")
+  private Map<String, Label> links = new HashMap<>();
 
-    public Entity withDescription(String description) {
-        this.description = description;
-        return this;
-    }
+  @Key
+  @JsonProperty("categories")
+  private Set<String> categories = null;
 
-    /**
-     * 
-     * @return
-     *     The imageUrl
-     */
-    @JsonProperty("imageUrl")
-    public String getImageUrl() {
-        return imageUrl;
-    }
+  public Entity withId(String id) {
+    this.id = id;
+    return this;
+  }
 
-    /**
-     * 
-     * @param imageUrl
-     *     The imageUrl
-     */
-    @JsonProperty("imageUrl")
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+  /**
+   * Knowledge graph ID of the entity.
+   * @return id
+   **/
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
 
-    public Entity withImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-        return this;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    /**
-     * 
-     * @return
-     *     The categories
-     */
-    @JsonProperty("categories")
-    public Set<String> getCategories() {
-        return categories;
-    }
+  public Entity withType(TypeEnum type) {
+    this.type = type;
+    return this;
+  }
 
-    /**
-     * 
-     * @param categories
-     *     The categories
-     */
-    @JsonProperty("categories")
-    public void setCategories(Set<String> categories) {
-        this.categories = categories;
-    }
+  /**
+   * The most salient entity type.
+   * @return type
+   **/
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
+  }
 
-    public Entity withCategories(Set<String> categories) {
-        this.categories = categories;
-        return this;
-    }
+  public void setType(TypeEnum type) {
+    this.type = type;
+  }
 
-    @Override
-    public String toString() {
-    	return this.getId();
+  public Entity withNames(Map<String, Label> names) {
+    this.names = names;
+    return this;
+  }
+
+  public Entity putNamesItem(String key, Label namesItem) {
+    this.names.put(key, namesItem);
+    return this;
+  }
+
+  /**
+   * a (language, label) map. &#x60;en&#x60; is an example key.
+   * @return names
+   **/
+  @JsonProperty("names")
+  public Map<String, Label> getNames() {
+    return names;
+  }
+
+  public void setNames(Map<String, Label> names) {
+    this.names = names;
+  }
+
+  public Entity withDescriptions(Map<String, Label> descriptions) {
+    this.descriptions = descriptions;
+    return this;
+  }
+
+  public Entity putDescriptionsItem(String key, Label descriptionsItem) {
+    this.descriptions.put(key, descriptionsItem);
+    return this;
+  }
+
+  /**
+   * a (language, label) map. &#x60;en&#x60; is an example key.
+   * @return descriptions
+   **/
+  @JsonProperty("descriptions")
+  public Map<String, Label> getDescriptions() {
+    return descriptions;
+  }
+
+  public void setDescriptions(Map<String, Label> descriptions) {
+    this.descriptions = descriptions;
+  }
+
+  public Entity withDetailedDescriptions(Map<String, Label> detailedDescriptions) {
+    this.detailedDescriptions = detailedDescriptions;
+    return this;
+  }
+
+  public Entity putDetailedDescriptionsItem(String key, Label detailedDescriptionsItem) {
+    if (this.detailedDescriptions == null) {
+      this.detailedDescriptions = new HashMap<String, Label>();
     }
+    this.detailedDescriptions.put(key, detailedDescriptionsItem);
+    return this;
+  }
+
+  /**
+   * a (language, label) map. &#x60;en&#x60; is an example key.
+   * @return detailedDescriptions
+   **/
+  @JsonProperty("detailedDescriptions")
+  public Map<String, Label> getDetailedDescriptions() {
+    return detailedDescriptions;
+  }
+
+  public void setDetailedDescriptions(Map<String, Label> detailedDescriptions) {
+    this.detailedDescriptions = detailedDescriptions;
+  }
+
+  public Entity withImage(Image image) {
+    this.image = image;
+    return this;
+  }
+
+  /**
+   * Get image
+   * @return image
+   **/
+  @JsonProperty("image")
+  public Image getImage() {
+    return image;
+  }
+
+  public void setImage(Image image) {
+    this.image = image;
+  }
+
+  public Entity withLinks(Map<String, Label> links) {
+    this.links = links;
+    return this;
+  }
+
+  public Entity putLinksItem(String key, Label linksItem) {
+    this.links.put(key, linksItem);
+    return this;
+  }
+
+  /**
+   * a (language, label) map. &#x60;en&#x60; is an example key and value is an external links to different sources
+   * @return links
+   **/
+  @JsonProperty("links")
+  public Map<String, Label> getLinks() {
+    return links;
+  }
+
+  public void setLinks(Map<String, Label> links) {
+    this.links = links;
+  }
+
+  public Entity withCategories(Set<String> categories) {
+    this.categories = categories;
+    return this;
+  }
+
+  public Entity addCategoriesItem(String categoriesItem) {
+    if (this.categories == null) {
+      this.categories = new HashSet<String>();
+    }
+    this.categories.add(categoriesItem);
+    return this;
+  }
+
+  /**
+   * List of categories, whereby each category is referenced by its knowledge graph ID.
+   * @return categories
+   **/
+  @JsonProperty("categories")
+  public Set<String> getCategories() {
+    return categories;
+  }
+
+  public void setCategories(Set<String> categories) {
+    this.categories = categories;
+  }
+
+  @Override public String toString() {
+    return this.getId();
+  }
 
 }

@@ -15,6 +15,8 @@ The client library includes these features:
 - Authenticates your client application via [OAuth 2](https://tools.ietf.org/html/rfc6749).
 - Builds on the [Google APIs Client Library for Java](https://github.com/google/google-api-java-client).
 
+The latest version of the library uses latest version **v2** of the Ambiverse NLU API published March 13, 2018. For version **v1**, please check the releases or the tag **v1**.
+
 ## <a name='highlighted_features'>Highlighted Features<a/>
 
 - **Easily call the Ambiverse Natural Language Understanding API.**
@@ -52,12 +54,17 @@ The client library includes these features:
     .execute();
 
   // Iterate through the entities.
-  for (Entity e : entities.getEntities()) {
-    String name = e.getName());                     // Name
-    String desc = e.getDescription());              // Description
-    Set<String> categories = e.getCategories());    // Categories
-    List<Link> links = e.getLinks());               // Links, e.g. to Wikipedia articles
-    String imageUrl = e.getImageUrl());             // Image
+  for (Map.Entry<String, Entity> entityEntry : entities.getEntities().entrySet()) {
+    Entity e = entityEntry.getValue();
+    System.out.println("- Names: ");
+    for(Map.Entry<String, Label> entry : e.getNames().entrySet()) {
+      System.out.println("  - "+entry.getValue().getLanguage()+": "+entry.getValue().getValue());
+    }
+  
+    System.out.println("- Short descriptions: ");
+    for(Map.Entry<String, Label> entry : e.getDescriptions().entrySet()) {
+      System.out.println("  - "+entry.getValue().getLanguage()+": "+entry.getValue().getValue());
+    }
     ...
   }
   ```

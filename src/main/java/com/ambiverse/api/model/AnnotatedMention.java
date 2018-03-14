@@ -6,7 +6,6 @@ import com.google.api.client.util.Key;
 import javax.annotation.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Generated("org.jsonschema2pojo")
 @JsonPropertyOrder({
     "charLength",
     "charOffset",

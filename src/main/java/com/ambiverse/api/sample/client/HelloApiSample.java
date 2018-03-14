@@ -3,19 +3,12 @@ package com.ambiverse.api.sample.client;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import com.ambiverse.api.AmbiverseApiClient;
 import com.ambiverse.api.ApiException;
-import com.ambiverse.api.model.AnalyzeInput;
-import com.ambiverse.api.model.AnalyzeOutput;
-import com.ambiverse.api.model.Categories;
-import com.ambiverse.api.model.Category;
-import com.ambiverse.api.model.Entities;
-import com.ambiverse.api.model.Entity;
-import com.ambiverse.api.model.Link;
-import com.ambiverse.api.model.Match;
-import com.ambiverse.api.model.Meta;
+import com.ambiverse.api.model.*;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -109,6 +102,13 @@ public class HelloApiSample {
 			System.out.println("  Linked entity: " + match.getEntity().getId() +
 							   " (confidence score: " + match.getEntity().getConfidence() + ")");
 		}
+
+		System.out.println("All unique entities:");
+
+		for (OutputEntity entity : output.getEntities()) {
+			System.out.println("  ID:"+entity.getId()+" ["+entity.getType()+"] (salience score: "+entity.getSalience()+")");
+		}
+
 		
 		System.out.println(LF);
 		
@@ -142,15 +142,31 @@ public class HelloApiSample {
 				.get(id)
 				.execute();
 		
-		for (Entity e : entities.getEntities()) {		
-			System.out.println("- Name: " + e.getName());
-			System.out.println("- Description (first 100 chars): " + e.getDescription().substring(0,  100) + "...");
+		for (Map.Entry<String, Entity> entityEntry : entities.getEntities().entrySet()) {
+
+			Entity e = entityEntry.getValue();
+			System.out.println("- Names: ");
+			for(Map.Entry<String, Label> entry : e.getNames().entrySet()) {
+				System.out.println("  - "+entry.getValue().getLanguage()+": "+entry.getValue().getValue());
+			}
+
+			System.out.println("- Short descriptions: ");
+			for(Map.Entry<String, Label> entry : e.getDescriptions().entrySet()) {
+				System.out.println("  - "+entry.getValue().getLanguage()+": "+entry.getValue().getValue());
+			}
+
+			System.out.println("- Detailed descriptions: ");
+			for(Map.Entry<String, Label> entry : e.getDetailedDescriptions().entrySet()) {
+				System.out.println("  - "+entry.getValue().getLanguage()+": "+entry.getValue().getValue());
+			}
+
 			System.out.println("- Categories (subset of 10): " + new ArrayList<String>(e.getCategories()).subList(0, 10));
 			System.out.println("- Links: ");
-			for (Link l : e.getLinks()) {
-				System.out.println("  - Link: " + l.getUrl() + " (" + l.getSource() + ")");
+			for(Map.Entry<String, Label> entry : e.getLinks().entrySet()) {
+				System.out.println("  - "+entry.getValue().getLanguage()+": "+entry.getValue().getValue());
 			}
-			System.out.println("- ImageUrl: " + e.getImageUrl());
+
+			System.out.println("- Image: " + e.getImage());
 		}
 		
 		System.out.println(LF);
@@ -165,8 +181,8 @@ public class HelloApiSample {
 					 "http://www.wikidata.org/entity/Q4970")			// Hangzhou
 				.execute();
 		
-		for (Entity e : entities.getEntities()) {
-			System.out.println("- Entity: " + e.getName() + " (" + e.getId() + ")");
+		for (Map.Entry<String, Entity> entry : entities.getEntities().entrySet()) {
+			System.out.println("- Entity: " + entry.getValue().getNames().get("en").getValue() + " (" + entry.getValue().getId() + ")");
 		}
 		
 		System.out.println(LF);
@@ -192,8 +208,8 @@ public class HelloApiSample {
 					 "YAGO3:<wikicat_Investment_banks>")
 				.execute();
 		
-		for (Category c : categories.getCategories()) {
-			System.out.println("- Category: " + c.getName() + " (" + c.getId() + ")");
+		for (Map.Entry<String, Category> entry : categories.getCategories().entrySet()) {
+			System.out.println("- Category: " + entry.getValue().getName() + " (" + entry.getValue().getId() + ")");
 		}
 		
 		System.out.println(LF);
@@ -255,14 +271,15 @@ public class HelloApiSample {
 		Entities entities = client.knowledgeGraph().entities()
 			.get(entityIDs)
 			.execute();
-		
-		for (int i = 0; i < entities.getEntities().size(); i++) {
-			Entity e = entities.getEntities().get(i);
+
+		int i = 0;
+		for (Map.Entry<String, Entity> entry : entities.getEntities().entrySet()) {
+			Entity e = entry.getValue();
 			
 			if (e.getId() != null) {
-				System.out.println("- " + e.getId() + " found. The image URL is " + e.getImageUrl());
+				System.out.println("- " + e.getId() + " found. The image URL is " + e.getImage().getUrl());
 			} else {
-				System.out.println("- " + entityIDs[i] + " not found in the knowledge graph.");
+				System.out.println("- " + entityIDs[++i] + " not found in the knowledge graph.");
 			}
 		}			
 	}

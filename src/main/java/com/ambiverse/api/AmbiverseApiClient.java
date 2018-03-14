@@ -35,7 +35,7 @@ public class AmbiverseApiClient extends AbstractGoogleJsonClient {
 	public static final String HOST_URL = "https://api.ambiverse.com";
 
 	/** The service path of the current schema */
-	public static final String SERVICE_PATH = "/v1";
+	public static final String SERVICE_PATH = "/v2";
 
 	/** The file that the client credentials are read from */
 	private static final String CLIENT_SECRETS_FILENAME = "client_secrets.json";
@@ -304,7 +304,7 @@ public class AmbiverseApiClient extends AbstractGoogleJsonClient {
 			/**
 			 * HTTP request for {@link com.ambiverse.api.model.Entities}.
 			 */
-			public class Post extends Request<com.ambiverse.api.model.Entities> {				
+			public class Post extends Request<com.ambiverse.api.model.Entities> {
 				private static final String PATH = Entities.PATH;
 				
 				protected Post(String... yagoIDs) {				
